@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-extern const char* parse_array(const char* value, const char **ep, json_parse_callback callback, void* ud);
-extern const char* parse_object(const char* value, const char **ep, json_parse_callback callback, void* ud);
+static const char* parse_array(const char* value, const char **ep, json_parse_callback callback, void* ud);
+static const char* parse_object(const char* value, const char **ep, json_parse_callback callback, void* ud);
 
 static const char *global_ep = NULL;
 
@@ -203,7 +203,7 @@ const char* parse_value(const char* value, const char **ep,
 	return NULL;
 }
 
-const char* parse_array(const char* value, const char **ep, json_parse_callback callback, void* ud) {
+static const char* parse_array(const char* value, const char **ep, json_parse_callback callback, void* ud) {
 	JsonKey key;
 
 	if (*value != '['){
@@ -246,7 +246,7 @@ const char* parse_array(const char* value, const char **ep, json_parse_callback 
 	return NULL;
 }
 
-const char* parse_object(const char* value, const char **ep, json_parse_callback callback, void* ud) {
+static const char* parse_object(const char* value, const char **ep, json_parse_callback callback, void* ud) {
 	JsonKey key;
 	if (*value != '{') {
 		/* not an object! */

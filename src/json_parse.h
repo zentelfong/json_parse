@@ -1,5 +1,4 @@
 #pragma once
-//json parse 是一个sax风格json解析器，0内存分配，性能出色。
 
 struct JsonKey {
 	const char* key;

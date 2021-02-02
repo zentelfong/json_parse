@@ -61,15 +61,24 @@ void on_parse(JsonKey* key, JsonValue* value, void* ud) {
 
 void bechmark() {
 	auto data = readFile("../data/citm_catalog.json");
-	std::string error;
-	TimeChecker checker;
-	bool rslt = json_parse(data.c_str(), null_parse, NULL);
-	printf("json_parse cost %d rslt=%s\n", (int)checker.elapsed(),rslt?"true":"false");
+
+	{
+		TimeChecker checker;
+		bool rslt = json_parse(data.c_str(), null_parse, NULL);
+		printf("json_parse cost %d rslt=%s\n", (int)checker.elapsed(), rslt ? "true" : "false");
+	}
+
+	{
+		TimeChecker checker;
+		char* rslt = strdup(data.c_str());
+		printf("strdup cost %d\n", (int)checker.elapsed());
+		free(rslt);
+	}
 }
 
 int main() {
 
-	std::string testjs = "{\"num\":1.234567890123,\"int\":1234567890123456,\"arr\":[1,2,3,4],\"map\":{\"a\":\"2321312\"}}";
+	std::string testjs = "{\"num\":1.234567890123,\"int\":1234567890123456,\"arr\":[1,2,3,4],\"map\":{\"a\":\"aaaaaa\",\"b\":\"bbbbbb\"}}";
 	json_parse(testjs.c_str(), on_parse, NULL);
 	bechmark();
 
