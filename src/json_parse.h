@@ -27,7 +27,7 @@ struct JsonValue {
 	int         string_len;
 };
 
-typedef void (*json_parse_callback)(JsonKey* key, JsonValue* value, void* ud);
+typedef bool (*json_parse_callback)(JsonKey* key, JsonValue* value, void* ud);
 
 //½âÎöjson×Ö·û´®
 bool json_parse2(const char* str, const char **return_parse_end, json_parse_callback callback,void* ud);

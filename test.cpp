@@ -47,20 +47,22 @@ std::string JsonToString(JsonValue* value) {
 }
 
 
-void null_parse(JsonKey* key, JsonValue* value, void* ud) {
+bool null_parse(JsonKey* key, JsonValue* value, void* ud) {
+	return true;
 }
 
-void on_parse(JsonKey* key, JsonValue* value, void* ud) {
+bool on_parse(JsonKey* key, JsonValue* value, void* ud) {
 	if (key->key) {
 		std::string skey(key->key, key->key_len);
 		printf("%s => %s\n",skey.c_str(), JsonToString(value).c_str());
 	} else {
 		printf("%d => %s\n", key->idx, JsonToString(value).c_str());
 	}
+	return true;
 }
 
 void bechmark() {
-	auto data = readFile("../data/citm_catalog.json");
+	auto data = readFile("../data/canada.json");
 
 	{
 		TimeChecker checker;

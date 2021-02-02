@@ -28,6 +28,7 @@ static const char *parse_key(const char *str, const char **ep, JsonKey* key) {
 		if (*ptr++ == '\\') {
 			if (*ptr == '\0') {
 				/* prevent buffer overflow when last input character is a backslash */
+				*ep = ptr;
 				return NULL;
 			}
 			/* Skip escaped quotes. */
@@ -63,6 +64,7 @@ static const char *parse_string(const char *str, const char **ep, JsonValue *ite
 		if (*end_ptr++ == '\\'){
 			if (*end_ptr == '\0'){
 				/* prevent buffer overflow when last input character is a backslash */
+				*ep = end_ptr;
 				return NULL;
 			}
 			/* Skip escaped quotes. */
@@ -150,55 +152,93 @@ const char* parse_value(const char* value, const char **ep,
 	JsonKey* key,json_parse_callback callback, void* ud) {
 
 	JsonValue item;
+	item.type = JSON_NULL;
 	item.string_value = NULL;
 	item.string_len = 0;
 
-	if (!strncmp(value, "null", 4)) {
-		item.type = JSON_NULL;
-		callback(key, &item,ud);
-		return value + 4;
-	}
-	if (!strncmp(value, "false", 5)) {
-		item.type = JSON_BOOL;
-		item.bool_value = false;
-		callback(key, &item, ud);
-		return value + 5;
-	}
-	if (!strncmp(value, "true", 4)) {
-		item.type = JSON_BOOL;
-		item.bool_value = true;
-		callback(key, &item, ud);
-		return value + 4;
-	}
-	if (*value == '\"') {
-		value = parse_string(value, ep, &item);
-		if (value) {
-			callback(key, &item, ud);
+	switch (*value) {
+	case 'n':
+		if (!strncmp(value, "null", 4)){
+			if (callback(key, &item, ud))
+				return value + 4;
+			else
+				return NULL;
 		}
-		return value;
-	}
-	if ((*value == '-') || ((*value >= '0') && (*value <= '9'))) {
+		break;
+	case 'f':
+		if (!strncmp(value, "false", 5)) {
+			item.type = JSON_BOOL;
+			item.bool_value = false;
+			if (callback(key, &item, ud))
+				return value + 5;
+			else
+				return NULL;
+		}
+		break;
+	case 't':
+		if (!strncmp(value, "true", 4)) {
+			item.type = JSON_BOOL;
+			item.bool_value = true;
+			if (callback(key, &item, ud))
+				return value + 4;
+			else
+				return NULL;
+		}
+		break;
+	case '\"':
+		{
+			value = parse_string(value, ep, &item);
+			if (value && callback(key, &item, ud))
+				return value;
+			else
+				return NULL;
+		}
+	case '-':
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	case '.':
+	{
 		value = parse_number(value, &item);
-		callback(key, &item, ud);
-		return value;
+		if (value && callback(key, &item, ud))
+			return value;
+		else
+			return NULL;
 	}
-	if (*value == '[') {
+	case '[':
+	{
 		item.type = JSON_ARRAY_BEGIN;
-		callback(key, &item, ud);
-		value = parse_array(value, ep,callback,ud);
+		if (!callback(key, &item, ud))
+			return NULL;
+		value = parse_array(value, ep, callback, ud);
 		item.type = JSON_ARRAY_END;
-		callback(key, &item, ud);
-		return value;
+		if (value && callback(key, &item, ud))
+			return value;
+		else
+			return NULL;
 	}
-	if (*value == '{') {
+	case '{':
+	{
 		item.type = JSON_OBJECT_BEGIN;
-		callback(key, &item, ud);
+		if (!callback(key, &item, ud))
+			return NULL;
 		value = parse_object(value, ep, callback, ud);
 		item.type = JSON_OBJECT_END;
-		callback(key, &item, ud);
-		return value;
+		if (value && callback(key, &item, ud))
+			return value;
+		else
+			return NULL;
 	}
-
+	default:
+		break;
+	}
 	*ep = value;
 	return NULL;
 }
