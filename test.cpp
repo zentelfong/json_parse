@@ -69,7 +69,7 @@ void bechmark() {
 
 int main() {
 
-	std::string testjs = "{\"num\":1.234567890123,\"int\":1234567890123456}";
+	std::string testjs = "{\"num\":1.234567890123,\"int\":1234567890123456,\"arr\":[1,2,3,4],\"map\":{\"a\":\"2321312\"}}";
 	json_parse(testjs.c_str(), on_parse, NULL);
 	bechmark();
 

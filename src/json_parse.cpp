@@ -69,7 +69,7 @@ static const char *parse_string(const char *str, const char **ep, JsonValue *ite
 			end_ptr++;
 		}
 	}
-
+	item->type = JSON_STRING;
 	item->string_value = ptr;
 	item->string_len = len;
 
