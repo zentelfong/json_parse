@@ -183,14 +183,20 @@ const char* parse_value(const char* value, const char **ep,
 		return value;
 	}
 	if (*value == '[') {
-		item.type = JSON_ARRAY;
+		item.type = JSON_ARRAY_BEGIN;
 		callback(key, &item, ud);
-		return parse_array(value, ep,callback,ud);
+		value = parse_array(value, ep,callback,ud);
+		item.type = JSON_ARRAY_END;
+		callback(key, &item, ud);
+		return value;
 	}
 	if (*value == '{') {
-		item.type = JSON_OBJECT;
+		item.type = JSON_OBJECT_BEGIN;
 		callback(key, &item, ud);
-		return parse_object(value, ep, callback, ud);
+		value = parse_object(value, ep, callback, ud);
+		item.type = JSON_OBJECT_END;
+		callback(key, &item, ud);
+		return value;
 	}
 
 	*ep = value;
@@ -310,9 +316,9 @@ bool json_parse2(const char* str, const char **return_parse_end,json_parse_callb
 	const char **ep = return_parse_end ? return_parse_end : &global_ep;
 	str = skip(str);
 	if (*str == '[') {
-		return parse_array(str, ep, callback,ud) != nullptr;
+		return parse_array(str, ep, callback,ud) != NULL;
 	} else if (*str == '{') {
-		return parse_object(str, ep, callback, ud) != nullptr;
+		return parse_object(str, ep, callback, ud) != NULL;
 	} else {
 		return false;
 	}
@@ -323,8 +329,7 @@ bool json_parse(const char* str, json_parse_callback callback, void* ud) {
 }
 
 /* parse 4 digit hexadecimal number */
-static unsigned parse_hex4(const char *str)
-{
+static unsigned parse_hex4(const char *str) {
 	unsigned h = 0;
 	/* first digit */
 	if ((*str >= '0') && (*str <= '9'))
@@ -410,8 +415,7 @@ static unsigned parse_hex4(const char *str)
 
 
 /* first bytes of UTF8 encoding for a given length in bytes */
-static const unsigned char firstByteMark[7] =
-{
+static const unsigned char firstByteMark[7] = {
 	0x00, /* should never happen */
 	0x00, /* 0xxxxxxx */
 	0xC0, /* 110xxxxx */

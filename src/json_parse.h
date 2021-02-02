@@ -1,5 +1,5 @@
 #pragma once
-//json parse 是一个sax风格json解析器
+//json parse 是一个sax风格json解析器，0内存分配，性能出色。
 
 struct JsonKey {
 	const char* key;
@@ -12,8 +12,10 @@ enum JsonValueType{
 	JSON_BOOL,
 	JSON_NUMBER,
 	JSON_STRING,
-	JSON_ARRAY,
-	JSON_OBJECT,
+	JSON_ARRAY_BEGIN,
+	JSON_ARRAY_END,
+	JSON_OBJECT_BEGIN,
+	JSON_OBJECT_END
 };
 
 //json的值
