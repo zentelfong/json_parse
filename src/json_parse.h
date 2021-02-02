@@ -1,12 +1,18 @@
 #pragma once
+#include <stdbool.h>
+#include <stdio.h>
 
-struct JsonKey {
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+typedef struct JsonKey {
 	const char* key;
 	int key_len;
 	int idx;
-};
+}JsonKey;
 
-enum JsonValueType{
+typedef enum JsonValueType{
 	JSON_NULL,
 	JSON_BOOL,
 	JSON_NUMBER,
@@ -15,17 +21,17 @@ enum JsonValueType{
 	JSON_ARRAY_END,
 	JSON_OBJECT_BEGIN,
 	JSON_OBJECT_END
-};
+}JsonValueType;
 
 //json的值
-struct JsonValue {
+typedef struct JsonValue {
 	JsonValueType type;
 	bool bool_value;
 	int  int_value;
 	double double_value;
 	const char* string_value;
 	int         string_len;
-};
+}JsonValue;
 
 typedef bool (*json_parse_callback)(JsonKey* key, JsonValue* value, void* ud);
 
@@ -36,3 +42,7 @@ bool json_parse(const char* str, json_parse_callback callback, void* ud);
 
 //去除json字符串转移
 bool json_unescape(const char* str,size_t len, char* buffer);
+
+#ifdef __cplusplus
+}
+#endif
