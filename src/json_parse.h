@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -23,7 +23,7 @@ typedef enum JsonValueType{
 	JSON_OBJECT_END
 }JsonValueType;
 
-//jsonµÄÖµ
+//jsonçš„å€¼
 typedef struct JsonValue {
 	JsonValueType type;
 	bool bool_value;
@@ -35,12 +35,12 @@ typedef struct JsonValue {
 
 typedef bool (*json_parse_callback)(JsonKey* key, JsonValue* value, void* ud);
 
-//½âÎöjson×Ö·û´®
+//è§£æjsonå­—ç¬¦ä¸²
 bool json_parse2(const char* str, const char **return_parse_end, json_parse_callback callback,void* ud);
 
 bool json_parse(const char* str, json_parse_callback callback, void* ud);
 
-//È¥³ıjson×Ö·û´®×ªÒÆ
+//å»é™¤jsonå­—ç¬¦ä¸²è½¬ç§»
 bool json_unescape(const char* str,size_t len, char* buffer);
 
 #ifdef __cplusplus

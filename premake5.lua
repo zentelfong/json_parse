@@ -19,7 +19,7 @@ solution "json_parse"
 		kind "StaticLib"
 		files { 
 			"src/*.h",
-			"src/*.cpp",
+			"src/*.c",
 		}
 
 	project "test"
