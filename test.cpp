@@ -1,4 +1,5 @@
 #include "src/json_parse.h"
+#include "src/json_write.h"
 #include "TimeChecker.h"
 #include <stdio.h>
 #include <iostream>
@@ -86,12 +87,29 @@ void bechmark() {
 	}
 }
 
+int write(const char* s, size_t len, void* ud) {
+	printf("%s", s);
+	return 0;
+}
+
+void test_writer() {
+	json_writer writer;
+	json_write_init(&writer, write, NULL);
+
+	json_write_object_begin(&writer);
+
+	json_write_key(&writer, "test");
+	json_write_string(&writer, "data");
+	json_write_object_end(&writer);
+}
+
+
 int main() {
 
 	std::string testjs = "{\"num\":1.234567890123,\"int\":1234567890123456,\"arr\":[1,2,3,4],\"map\":{\"a\":\"aaaaaa\",\"b\":\"bbbbbb\"}}";
 	json_parse(testjs.c_str(), on_parse, NULL);
-	bechmark();
-
+	//bechmark();
+	test_writer();
 	getchar();
 	return 0;
 }
