@@ -65,7 +65,7 @@ bool on_parse(JsonKey* key, JsonValue* value, void* ud) {
 #define TEST_COUNT 10
 
 void bechmark() {
-	auto data = readFile("../data/sample.json");
+	auto data = readFile("../data/citm_catalog.json");
 
 	{
 		TimeChecker checker;
