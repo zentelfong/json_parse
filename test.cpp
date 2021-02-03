@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <assert.h>
 
 std::string readFile(const char* filename) {
 	FILE* file = fopen(filename, "rb");
@@ -61,20 +62,27 @@ bool on_parse(JsonKey* key, JsonValue* value, void* ud) {
 	return true;
 }
 
+#define TEST_COUNT 10
+
 void bechmark() {
-	auto data = readFile("../data/canada.json");
+	auto data = readFile("../data/sample.json");
 
 	{
 		TimeChecker checker;
-		bool rslt = json_parse(data.c_str(), null_parse, NULL);
-		printf("json_parse cost %d rslt=%s\n", (int)checker.elapsed(), rslt ? "true" : "false");
+		for (int i = 0; i < TEST_COUNT; ++i) {
+			bool rslt = json_parse(data.c_str(), null_parse, NULL);
+			assert(rslt);
+		}
+		printf("json_parse cost %d\n", (int)checker.elapsed());
 	}
 
 	{
 		TimeChecker checker;
-		char* rslt = strdup(data.c_str());
+		for (int i = 0; i < TEST_COUNT; ++i) {
+			char* rslt = strdup(data.c_str());
+			free(rslt);
+		}
 		printf("strdup cost %d\n", (int)checker.elapsed());
-		free(rslt);
 	}
 }
 
