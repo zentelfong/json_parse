@@ -97,6 +97,8 @@ void test_writer() {
 	json_writer writer;
 	json_write_init(&writer, write, NULL);
 
+	printf("generate js:");
+
 	json_write_object_begin(&writer);
 
 	json_write_name(&writer, "test");
@@ -108,6 +110,7 @@ void test_writer() {
 	json_write_name(&writer, "double");
 	json_write_double(&writer, 0.123456789);
 	json_write_object_end(&writer);
+	printf("\n");
 }
 
 
@@ -122,12 +125,28 @@ int write_string(const char* s, size_t len, void* ud) {
 	return 0;
 }
 
+const char* TEST_JSON_VALUE = R"(
+{
+    "num": 1.234567890123,
+    "int": 1234567890123456,
+	"str": "hello",
+	"null": null,
+	"true":true,
+	"false":false,
+	"arr": [1, 2, 3, 4],
+    "map": {
+        "a": "aaaaaa",
+        "b": "bbbbbb"
+    }
+}
+)";
+
 void test_parse_write() {
 	std::string strout;
 	json_writer writer;
 	json_write_init(&writer, write_string, &strout);
 
-	std::string testjs = "{\"num\":1.234567890123,\"string\":\"hello world\",\"int\":1234567890123456,\"arr\":[1,2,3,4],\"map\":{\"a\":\"aaaaaa\",\"b\":\"bbbbbb\"}}";
+	std::string testjs = TEST_JSON_VALUE;
 	json_parse(testjs.c_str(), parse_write, &writer);
 
 	printf("outjson:%s\n", strout.c_str());
@@ -137,7 +156,7 @@ void test_parse_write() {
 
 int main() {
 
-	std::string testjs = "{\"num\":1.234567890123,\"int\":1234567890123456,\"arr\":[1,2,3,4],\"map\":{\"a\":\"aaaaaa\",\"b\":\"bbbbbb\"}}";
+	std::string testjs = TEST_JSON_VALUE;
 	json_parse(testjs.c_str(), on_parse, NULL);
 
 	std::string testjs2 = "\"hello world\"";

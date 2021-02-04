@@ -288,6 +288,7 @@ static const char* parse_array(const char* value, const char **ep, json_parse_ca
 	}
 	
 	key.key = NULL;
+	key.key_len = 0;
 	key.idx = 0;
 
 	value = skip(parse_value(skip(value), ep,&key,callback,ud));
