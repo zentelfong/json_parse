@@ -40,7 +40,7 @@ bool json_parse2(const char* str, const char **return_parse_end, json_parse_call
 
 bool json_parse(const char* str, json_parse_callback callback, void* ud);
 
-//去除json字符串转移
+//去除json字符串转义
 bool json_unescape(const char* str,size_t len, char* buffer);
 
 #ifdef __cplusplus

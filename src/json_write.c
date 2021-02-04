@@ -74,7 +74,7 @@ static int _put_escaped(json_writer * writer,
 	return writer->err;
 }
 
-static int _put_quoted_escape(json_writer * writer,
+static int _put_quoted_string(json_writer * writer,
 					 const char* value,size_t len)
 {
 	_put(writer, "\"", 1);
@@ -82,7 +82,7 @@ static int _put_quoted_escape(json_writer * writer,
 	return _put(writer, "\"", 1);
 }
 
-static int _put_quoted_noescape(json_writer* writer,
+static int _put_quoted_escaped(json_writer* writer,
 	const char* value, size_t len)
 {
 	_put(writer, "\"", 1);
@@ -143,17 +143,17 @@ int json_write_array_end(json_writer * writer)
 	return _put(writer, "]", 1);
 }
 
-int json_write_key(json_writer * writer, const char* name)
+int json_write_name(json_writer * writer, const char* name)
 {
-	return json_write_key_len(writer, name, strlen(name));
+	return json_write_name_len(writer, name, strlen(name));
 }
 
-int json_write_key_len(json_writer * writer, const char* name,
+int json_write_name_len(json_writer * writer, const char* name,
 					  size_t len)
 {
 	_put_name_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA | _FLAG_NAME_PUTS_COMMA;
-	_put_quoted_escape(writer, name, len);
+	_put_quoted_string(writer, name, len);
 	return _put(writer, ":", 1);
 }
 
@@ -167,8 +167,22 @@ int json_write_string_len(json_writer * writer, const char* value,
 {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
-	return _put_quoted_escape(writer, value, len);
+	return _put_quoted_string(writer, value, len);
 }
+
+int json_write_escaped(json_writer* writer, const char* value)
+{
+	return json_write_escaped_len(writer, value, strlen(value));
+}
+
+int json_write_escaped_len(json_writer* writer, const char* value,
+	size_t len)
+{
+	_put_value_comma(writer);
+	writer->flags |= _FLAG_PUT_COMMA;
+	return _put_quoted_escaped(writer, value, len);
+}
+
 
 int json_write_uint32(json_writer * writer, uint32_t value) 
 {
@@ -214,3 +228,82 @@ int json_write_double(json_writer * writer, double value) {
 	return _put(writer, str, len);
 }
 
+int json_write_null(json_writer* writer) {
+	_put_value_comma(writer);
+	writer->flags |= _FLAG_PUT_COMMA;
+	return _put(writer, "null", 4);
+}
+
+int json_write_bool(json_writer* writer, bool value) {
+	_put_value_comma(writer);
+	writer->flags |= _FLAG_PUT_COMMA;
+	if(value)
+		return _put(writer, "true", 4);
+	else
+		return _put(writer, "false", 5);
+}
+
+int json_write_key(json_writer* writer, const JsonKey* key) {
+	if (key->key) {
+		_put_name_comma(writer);
+		writer->flags |= _FLAG_PUT_COMMA | _FLAG_NAME_PUTS_COMMA;
+		_put_quoted_escaped(writer, key->key, key->key_len);
+		return _put(writer, ":", 1);
+	} else {
+		return 0;
+	}
+}
+
+int json_write_value(json_writer* writer, const JsonValue* value) {
+
+	switch (value->type) {
+	case JSON_NULL:
+		return json_write_null(writer);
+	case JSON_BOOL:
+		return json_write_bool(writer, value->bool_value);
+	case JSON_NUMBER:
+		return json_write_double(writer, value->double_value);
+	case JSON_STRING:
+		return json_write_escaped_len(writer, value->string_value, value->string_len);
+	case JSON_ARRAY_BEGIN:
+		return json_write_array_begin(writer);
+	case JSON_ARRAY_END:
+		return json_write_array_end(writer);
+	case JSON_OBJECT_BEGIN:
+		return json_write_object_begin(writer);
+	case JSON_OBJECT_END:
+		return json_write_object_end(writer);
+	default:
+		return 0;
+	}
+}
+
+int json_write(json_writer* writer, const JsonKey* key, const JsonValue* value) {
+	int rslt = 0;
+	switch (value->type) {
+	case JSON_NULL:
+		rslt = json_write_key(writer, key);
+		return rslt == 0?json_write_null(writer):rslt;
+	case JSON_BOOL:
+		rslt = json_write_key(writer, key);
+		return rslt == 0 ? json_write_bool(writer, value->bool_value):rslt;
+	case JSON_NUMBER:
+		rslt = json_write_key(writer, key);
+		return rslt == 0 ? json_write_double(writer, value->double_value):rslt;
+	case JSON_STRING:
+		rslt = json_write_key(writer, key);
+		return rslt == 0 ? json_write_escaped_len(writer, value->string_value, value->string_len):rslt;
+	case JSON_ARRAY_BEGIN:
+		rslt = json_write_key(writer, key);
+		return rslt == 0 ? json_write_array_begin(writer):rslt;
+	case JSON_OBJECT_BEGIN:
+		rslt = json_write_key(writer, key);
+		return rslt == 0 ? json_write_object_begin(writer) : rslt;
+	case JSON_ARRAY_END:
+		return json_write_array_end(writer);
+	case JSON_OBJECT_END:
+		return json_write_object_end(writer);
+	default:
+		return 0;
+	}
+}

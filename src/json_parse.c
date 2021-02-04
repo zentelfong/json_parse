@@ -383,16 +383,15 @@ static const char* parse_object(const char* value, const char **ep, json_parse_c
 
 
 bool json_parse2(const char* str, const char **return_parse_end,json_parse_callback callback, void* ud) {
+	JsonKey key;
 	const char **ep = return_parse_end ? return_parse_end : &global_ep;
 	str = skip_bom(str);
 	str = skip(str);
-	if (*str == '[') {
-		return parse_array(str, ep, callback,ud) != NULL;
-	} else if (*str == '{') {
-		return parse_object(str, ep, callback, ud) != NULL;
-	} else {
-		return false;
-	}
+	
+	key.idx = 0;
+	key.key = NULL;
+	key.key_len = 0;
+	return parse_value(str, ep, &key, callback, ud);
 }
 
 bool json_parse(const char* str, json_parse_callback callback, void* ud) {
