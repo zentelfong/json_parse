@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern int   dtoa(double d, char dest[24]);
+extern char* u32toa(uint32_t value, char* buffer);
+extern char* i32toa(int32_t value, char* buffer);
+extern char* u64toa(uint64_t value, char* buffer);
+extern char* i64toa(int64_t value, char* buffer);
+
 enum _FLAGS
 {
 	_FLAG_PUT_COMMA = 1 << 0,
@@ -31,27 +37,6 @@ static const char  *_escapee(const char* b, const char* e)
 		}
 	}
 	return e;
-}
-
-static char  *_uint_str(char* e, unsigned value)
-{
-	char *p = e;
-	do
-	{
-		*--p = '0' + value % 10;
-	}
-	while (0 != (value /= 10));
-	return p;
-}
-
-static char  *_int_str(char* e, int value)
-{
-	char *p = _uint_str(e, 0 <= value? value: -value);
-	if (0 > value)
-	{
-		*--p = '-';
-	}
-	return p;
 }
 
 static int _put(json_writer * writer,
@@ -164,7 +149,7 @@ int json_write_key(json_writer * writer, const char* name)
 }
 
 int json_write_key_len(json_writer * writer, const char* name,
-					  const size_t len)
+					  size_t len)
 {
 	_put_name_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA | _FLAG_NAME_PUTS_COMMA;
@@ -178,30 +163,54 @@ int json_write_string(json_writer * writer, const char* value)
 }
 
 int json_write_string_len(json_writer * writer, const char* value,
-						const size_t len)
+						size_t len)
 {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	return _put_quoted_escape(writer, value, len);
 }
 
-int json_write_uint(json_writer * writer,unsigned value)
+int json_write_uint32(json_writer * writer, uint32_t value) 
 {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
-	char str[16];
-	char *const e = str + sizeof(str);
-	char *const p = _uint_str(e, value);
-	return _put(writer, p, e - p);
+	char str[32];
+	char* e = u32toa(value, str);
+	return _put(writer, str, e - str);
 }
 
-int json_write_int(json_writer * writer, int value)
+int json_write_int32(json_writer * writer, int32_t value)
 {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
-	char str[16];
-	char *const e = str + sizeof(str);
-	char *const p = _int_str(e, value);
-	return _put(writer, p, e - p);
+	char str[32];
+	char* e = i32toa(value, str);
+	return _put(writer, str, e - str);
+}
+
+int json_write_uint64(json_writer * writer, uint64_t value)
+{
+	_put_value_comma(writer);
+	writer->flags |= _FLAG_PUT_COMMA;
+	char str[32];
+	char* e = u64toa(value, str);
+	return _put(writer, str, e - str);
+}
+
+int json_write_int64(json_writer * writer, int64_t value)
+{
+	_put_value_comma(writer);
+	writer->flags |= _FLAG_PUT_COMMA;
+	char str[32];
+	char* e = i64toa(value, str);
+	return _put(writer, str, e - str);
+}
+
+int json_write_double(json_writer * writer, double value) {
+	_put_value_comma(writer);
+	writer->flags |= _FLAG_PUT_COMMA;
+	char str[32];
+	int len = dtoa(value, str);
+	return _put(writer, str, len);
 }
 

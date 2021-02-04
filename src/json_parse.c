@@ -164,7 +164,7 @@ static const char *parse_number(const char *num, JsonValue *item)
 	return num;
 }
 
-const char* parse_value(const char* value, const char **ep, 
+static const char* parse_value(const char* value, const char **ep,
 	JsonKey* key,json_parse_callback callback, void* ud) {
 
 	JsonValue item;

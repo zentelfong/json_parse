@@ -1,5 +1,6 @@
 #pragma once
 #include <string.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,15 +23,19 @@ int json_write_object_end(json_writer * writer);
 int json_write_array_begin(json_writer * writer);
 int json_write_array_end(json_writer * writer);
 
-
 int json_write_key(json_writer * writer, const char* name);
 int json_write_key_len(json_writer * writer, const char* name,size_t len);
 
 int json_write_string(json_writer * writer, const char* value);
 int json_write_string_len(json_writer * writer, const char* value,size_t len);
 
-int json_write_uint(json_writer * writer, unsigned value);
-int json_write_int(json_writer * writer, int value);
+int json_write_uint32(json_writer * writer, uint32_t value);
+int json_write_int32(json_writer * writer, int32_t value);
+
+int json_write_uint64(json_writer * writer, uint64_t value);
+int json_write_int64(json_writer * writer, int64_t value);
+
+int json_write_double(json_writer * writer, double value);
 
 #ifdef __cplusplus
 } // extern "C"
