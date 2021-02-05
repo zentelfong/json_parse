@@ -11,8 +11,7 @@ extern "C" {
 
 typedef int (*json_write_cb)(const char *s, size_t len, void* ud);
 
-typedef struct json_writer
-{
+typedef struct json_writer {
 	int		err;
 	int		flags;
 	json_write_cb write;

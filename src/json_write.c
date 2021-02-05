@@ -9,14 +9,12 @@ extern char* i32toa(int32_t value, char* buffer);
 extern char* u64toa(uint64_t value, char* buffer);
 extern char* i64toa(int64_t value, char* buffer);
 
-enum _FLAGS
-{
+enum _FLAGS {
 	_FLAG_PUT_COMMA = 1 << 0,
 	_FLAG_NAME_PUTS_COMMA = 1 << 1,
 };
 
-static const char _escapees[0xff] =
-{
+static const char _escapees[0xff] = {
 	['\0'] = '0',   /* Zero */
 	['\b'] = 'b',  /* Backspace (ascii code 08) */
 	['\f'] = 'f',  /* Form feed (ascii code 0C) */
@@ -27,21 +25,17 @@ static const char _escapees[0xff] =
 	['\\'] = '\\', /* Backslash caracter */
 };
 
-static const char  *_escapee(const char* b, const char* e)
-{
-	for(const char *p = b; e != p; ++p)
-	{
-		if (0 != _escapees[(unsigned char)*p])
-		{
+static inline const char *_escapee(const char* b, const char* e) {
+	for(const char *p = b; e != p; ++p) {
+		if (0 != _escapees[(unsigned char)*p]) {
 			return p;
 		}
 	}
 	return e;
 }
 
-static int _put(json_writer * writer,
-				const char* s,size_t len)
-{
+static inline int _put(json_writer * writer,
+				const char* s,size_t len) {
 	if (0 == writer->err) {
 		writer->err = writer->write(s, len, writer->ud);
 	}
@@ -74,118 +68,100 @@ static int _put_escaped(json_writer * writer,
 	return writer->err;
 }
 
-static int _put_quoted_string(json_writer * writer,
-					 const char* value,size_t len)
-{
+static inline int _put_quoted_string(json_writer * writer,
+					 const char* value,size_t len) {
 	_put(writer, "\"", 1);
 	_put_escaped(writer, value, len);
 	return _put(writer, "\"", 1);
 }
 
-static int _put_quoted_escaped(json_writer* writer,
-	const char* value, size_t len)
-{
+static inline int _put_quoted_escaped(json_writer* writer,
+	const char* value, size_t len) {
 	_put(writer, "\"", 1);
 	_put(writer, value, len);
 	return _put(writer, "\"", 1);
 }
 
 
-static int _put_name_comma(json_writer * writer)
-{
-	if (_FLAG_PUT_COMMA & writer->flags)
-	{
+static inline int _put_name_comma(json_writer * writer) {
+	if (_FLAG_PUT_COMMA & writer->flags) {
 		_put(writer, ",", 1);
 	}
 	return writer->err;
 }
 
-static int _put_value_comma(json_writer * writer)
-{
-	if (_FLAG_PUT_COMMA & writer->flags && !(_FLAG_NAME_PUTS_COMMA & writer->flags))
-	{
+static inline int _put_value_comma(json_writer * writer) {
+	if (_FLAG_PUT_COMMA & writer->flags && !(_FLAG_NAME_PUTS_COMMA & writer->flags)) {
 		_put(writer, ",", 1);
 	}
 	return writer->err;
 }
 
-void json_write_init(json_writer* writer, json_write_cb write, void* ud)
-{
+void json_write_init(json_writer* writer, json_write_cb write, void* ud) {
 	writer->err = 0;
 	writer->flags = 0;
 	writer->ud = ud;
 	writer->write = write;
 }
 
-int json_write_object_begin(json_writer * writer)
-{
+int json_write_object_begin(json_writer * writer) {
 	_put_value_comma(writer);
 	writer->flags = 0;
 	return _put(writer, "{", 1);
 }
 
-int json_write_object_end(json_writer * writer)
-{
+int json_write_object_end(json_writer * writer) {
 	writer->flags = _FLAG_PUT_COMMA;
 	return _put(writer, "}", 1);
 }
 
-int json_write_array_begin(json_writer * writer)
-{
+int json_write_array_begin(json_writer * writer) {
 	_put_value_comma(writer);
 	writer->flags = 0;
 	return _put(writer, "[", 1);
 }
 
-int json_write_array_end(json_writer * writer)
-{
+int json_write_array_end(json_writer * writer) {
 	writer->flags = _FLAG_PUT_COMMA;
 	return _put(writer, "]", 1);
 }
 
-int json_write_name(json_writer * writer, const char* name)
-{
+int json_write_name(json_writer * writer, const char* name) {
 	return json_write_name_len(writer, name, strlen(name));
 }
 
 int json_write_name_len(json_writer * writer, const char* name,
-					  size_t len)
-{
+					  size_t len) {
 	_put_name_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA | _FLAG_NAME_PUTS_COMMA;
 	_put_quoted_string(writer, name, len);
 	return _put(writer, ":", 1);
 }
 
-int json_write_string(json_writer * writer, const char* value)
-{
+int json_write_string(json_writer * writer, const char* value) {
 	return	json_write_string_len(writer, value, strlen(value));
 }
 
 int json_write_string_len(json_writer * writer, const char* value,
-						size_t len)
-{
+						size_t len) {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	return _put_quoted_string(writer, value, len);
 }
 
-int json_write_escaped(json_writer* writer, const char* value)
-{
+int json_write_escaped(json_writer* writer, const char* value) {
 	return json_write_escaped_len(writer, value, strlen(value));
 }
 
 int json_write_escaped_len(json_writer* writer, const char* value,
-	size_t len)
-{
+	size_t len) {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	return _put_quoted_escaped(writer, value, len);
 }
 
 
-int json_write_uint32(json_writer * writer, uint32_t value) 
-{
+int json_write_uint32(json_writer * writer, uint32_t value) {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	char str[32];
@@ -193,8 +169,7 @@ int json_write_uint32(json_writer * writer, uint32_t value)
 	return _put(writer, str, e - str);
 }
 
-int json_write_int32(json_writer * writer, int32_t value)
-{
+int json_write_int32(json_writer * writer, int32_t value) {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	char str[32];
@@ -202,8 +177,7 @@ int json_write_int32(json_writer * writer, int32_t value)
 	return _put(writer, str, e - str);
 }
 
-int json_write_uint64(json_writer * writer, uint64_t value)
-{
+int json_write_uint64(json_writer * writer, uint64_t value) {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	char str[32];
@@ -211,8 +185,7 @@ int json_write_uint64(json_writer * writer, uint64_t value)
 	return _put(writer, str, e - str);
 }
 
-int json_write_int64(json_writer * writer, int64_t value)
-{
+int json_write_int64(json_writer * writer, int64_t value) {
 	_put_value_comma(writer);
 	writer->flags |= _FLAG_PUT_COMMA;
 	char str[32];

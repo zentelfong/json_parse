@@ -174,7 +174,7 @@ static const char* parse_value(const char* value, const char **ep,
 
 	switch (*value) {
 	case 'n':
-		if (!strncmp(value, "null", 4)){
+		if (!strncmp(value, "null", 4)) {
 			if (callback(key, &item, ud)) {
 				return value + 4;
 			} else {
@@ -199,7 +199,7 @@ static const char* parse_value(const char* value, const char **ep,
 		if (!strncmp(value, "true", 4)) {
 			item.type = JSON_BOOL;
 			item.bool_value = true;
-			if (callback(key, &item, ud)){
+			if (callback(key, &item, ud)) {
 				return value + 4;
 			} else {
 				*ep = value;
@@ -326,8 +326,7 @@ static const char* parse_object(const char* value, const char **ep, json_parse_c
 	}
 
 	value = skip(value + 1);
-	if (*value == '}')
-	{
+	if (*value == '}') {
 		/* empty object. */
 		return value + 1;
 	}
@@ -338,8 +337,7 @@ static const char* parse_object(const char* value, const char **ep, json_parse_c
 		return NULL;
 	}
 
-	if (*value != ':')
-	{
+	if (*value != ':') {
 		/* invalid object. */
 		*ep = value;
 		return NULL;
@@ -348,13 +346,13 @@ static const char* parse_object(const char* value, const char **ep, json_parse_c
 	/* skip any spacing, get the value. */
 	value = skip(parse_value(skip(value + 1), ep,&key,callback,ud));
 
-	if (!value){
+	if (!value) {
 		return NULL;
 	}
 
-	while (*value == ','){
+	while (*value == ',') {
 		value = skip(parse_key(skip(value + 1), ep,&key));
-		if (!value){
+		if (!value) {
 			return NULL;
 		}
 
@@ -373,7 +371,7 @@ static const char* parse_object(const char* value, const char **ep, json_parse_c
 	}
 
 	/* end of object */
-	if (*value == '}'){
+	if (*value == '}') {
 		return value + 1;
 	}
 
@@ -403,20 +401,16 @@ bool json_parse(const char* str, json_parse_callback callback, void* ud) {
 static unsigned parse_hex4(const char *str) {
 	unsigned h = 0;
 	/* first digit */
-	if ((*str >= '0') && (*str <= '9'))
-	{
+	if ((*str >= '0') && (*str <= '9')) {
 		h += (*str) - '0';
 	}
-	else if ((*str >= 'A') && (*str <= 'F'))
-	{
+	else if ((*str >= 'A') && (*str <= 'F')) {
 		h += 10 + (*str) - 'A';
 	}
-	else if ((*str >= 'a') && (*str <= 'f'))
-	{
+	else if ((*str >= 'a') && (*str <= 'f')) {
 		h += 10 + (*str) - 'a';
 	}
-	else /* invalid */
-	{
+	else /* invalid */ {
 		return 0;
 	}
 
@@ -424,60 +418,48 @@ static unsigned parse_hex4(const char *str) {
 	/* second digit */
 	h = h << 4;
 	str++;
-	if ((*str >= '0') && (*str <= '9'))
-	{
+	if ((*str >= '0') && (*str <= '9')) {
 		h += (*str) - '0';
 	}
-	else if ((*str >= 'A') && (*str <= 'F'))
-	{
+	else if ((*str >= 'A') && (*str <= 'F')) {
 		h += 10 + (*str) - 'A';
 	}
-	else if ((*str >= 'a') && (*str <= 'f'))
-	{
+	else if ((*str >= 'a') && (*str <= 'f')) {
 		h += 10 + (*str) - 'a';
 	}
-	else /* invalid */
-	{
+	else /* invalid */ {
 		return 0;
 	}
 
 	/* third digit */
 	h = h << 4;
 	str++;
-	if ((*str >= '0') && (*str <= '9'))
-	{
+	if ((*str >= '0') && (*str <= '9')) {
 		h += (*str) - '0';
 	}
-	else if ((*str >= 'A') && (*str <= 'F'))
-	{
+	else if ((*str >= 'A') && (*str <= 'F')) {
 		h += 10 + (*str) - 'A';
 	}
-	else if ((*str >= 'a') && (*str <= 'f'))
-	{
+	else if ((*str >= 'a') && (*str <= 'f')) {
 		h += 10 + (*str) - 'a';
 	}
-	else /* invalid */
-	{
+	else /* invalid */ {
 		return 0;
 	}
 
 	/* fourth digit */
 	h = h << 4;
 	str++;
-	if ((*str >= '0') && (*str <= '9'))
-	{
+	if ((*str >= '0') && (*str <= '9')) {
 		h += (*str) - '0';
 	}
-	else if ((*str >= 'A') && (*str <= 'F'))
-	{
+	else if ((*str >= 'A') && (*str <= 'F')) {
 		h += 10 + (*str) - 'A';
 	}
-	else if ((*str >= 'a') && (*str <= 'f'))
-	{
+	else if ((*str >= 'a') && (*str <= 'f')) {
 		h += 10 + (*str) - 'a';
 	}
-	else /* invalid */
-	{
+	else /* invalid */ {
 		return 0;
 	}
 
@@ -506,17 +488,14 @@ bool json_unescape(const char* str, size_t len, char* buffer) {
 	unsigned uc2 = 0;
 
 	/* loop through the string literal */
-	while (ptr < end_ptr)
-	{
+	while (ptr < end_ptr) {
 		if (*ptr != '\\') {
 			*ptr2++ = *ptr++;
 		}
 		/* escape sequence */
-		else
-		{
+		else {
 			ptr++;
-			switch (*ptr)
-			{
+			switch (*ptr) {
 			case 'b':
 				*ptr2++ = '\b';
 				break;
@@ -541,7 +520,7 @@ bool json_unescape(const char* str, size_t len, char* buffer) {
 				/* transcode utf16 to utf8. See RFC2781 and RFC3629. */
 				uc = parse_hex4(ptr + 1); /* get the unicode char. */
 				ptr += 4;
-				if (ptr >= end_ptr){
+				if (ptr >= end_ptr) {
 					/* invalid */
 					return false;
 				}
@@ -556,13 +535,13 @@ bool json_unescape(const char* str, size_t len, char* buffer) {
 						/* invalid */
 						return false;
 					}
-					if ((ptr[1] != '\\') || (ptr[2] != 'u')){
+					if ((ptr[1] != '\\') || (ptr[2] != 'u')) {
 						/* missing second-half of surrogate. */
 						return false;
 					}
 					uc2 = parse_hex4(ptr + 3);
 					ptr += 6; /* \uXXXX */
-					if ((uc2 < 0xDC00) || (uc2 > 0xDFFF)){
+					if ((uc2 < 0xDC00) || (uc2 > 0xDFFF)) {
 						/* invalid second-half of surrogate. */
 						return false;
 					}
@@ -574,18 +553,15 @@ bool json_unescape(const char* str, size_t len, char* buffer) {
 				* takes at maximum 4 bytes to encode:
 				* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
 				len = 4;
-				if (uc < 0x80)
-				{
+				if (uc < 0x80) {
 					/* normal ascii, encoding 0xxxxxxx */
 					len = 1;
 				}
-				else if (uc < 0x800)
-				{
+				else if (uc < 0x800) {
 					/* two bytes, encoding 110xxxxx 10xxxxxx */
 					len = 2;
 				}
-				else if (uc < 0x10000)
-				{
+				else if (uc < 0x10000) {
 					/* three bytes, encoding 1110xxxx 10xxxxxx 10xxxxxx */
 					len = 3;
 				}
